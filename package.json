@@ -1,0 +1,104 @@
+{
+  "name": "@beefree.io/vue-email-builder",
+  "version": "0.1.0",
+  "description": "Vue.js wrapper for the Beefree SDK – A framework-specific package that provides Vue.js components and composables to integrate the Beefree SDK (Email Builder, Page Builder, File Manager, Popup Builder) into Vue.js applications",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BeefreeSDK/vue-email-builder.git"
+  },
+  "bugs": {
+    "url": "https://github.com/BeefreeSDK/vue-email-builder/issues"
+  },
+  "homepage": "https://github.com/BeefreeSDK/vue-email-builder#readme",
+  "author": "Beefree <dev@beefree.io> (https://www.beefree.io)",
+  "license": "Apache-2.0",
+  "main": "dist/index.js",
+  "module": "dist/index.es.js",
+  "types": "dist/index.d.ts",
+  "sideEffects": false,
+  "keywords": [
+    "vue",
+    "vue3",
+    "beefree",
+    "email-builder",
+    "page-builder",
+    "drag-and-drop",
+    "wysiwyg",
+    "editor",
+    "visual-editor",
+    "vue-component",
+    "composable"
+  ],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "scripts": {
+    "build": "vite build --config vite.lib.config.ts",
+    "start": "vite --config vite.config.ts",
+    "clean": "rimraf dist",
+    "prepare": "husky",
+    "prebuild": "yarn clean",
+    "prerelease": "git pull && yarn prebuild && yarn test:ci && yarn build",
+    "lint": "eslint ./src --ext ts,vue",
+    "test": "vitest",
+    "test:ci": "vitest run",
+    "release": "standard-version",
+    "postrelease": "git push --follow-tags --no-verify",
+    "release:alpha": "yarn prerelease && standard-version --prerelease alpha && yarn postrelease",
+    "release:beta": "yarn prerelease && standard-version --prerelease beta && yarn postrelease",
+    "release:unstable": "yarn prerelease && standard-version --prerelease $(git branch --show-current | sed 's/\\//-/g') && yarn postrelease",
+    "prestart": "yarn clean",
+    "test:example": "vitest run --config vitest.example.config.ts",
+    "coverage": "vitest run --coverage",
+    "coverage:example": "vitest run --coverage --config vitest.example.config.ts"
+  },
+  "lint-staged": {
+    "*.{ts,vue}": "eslint"
+  },
+  "dependencies": {
+    "@beefree.io/sdk": "^11.2.1"
+  },
+  "devDependencies": {
+    "@commitlint/config-conventional": "^20.0.0",
+    "@stylistic/eslint-plugin": "^5.2.3",
+    "@testing-library/dom": "^10.4.1",
+    "@vitejs/plugin-vue": "^5.2.4",
+    "@vitest/coverage-istanbul": "^3.2.4",
+    "@vue/compiler-sfc": "^3.5.17",
+    "@vue/eslint-config-typescript": "^14.5.1",
+    "@vue/test-utils": "^2.4.6",
+    "eslint": "^9.34.0",
+    "eslint-plugin-vue": "^10.2.0",
+    "globals": "^16.3.0",
+    "husky": "^9.1.7",
+    "jsdom": "^26.1.0",
+    "lint-staged": "^16.1.5",
+    "rimraf": "^6.0.1",
+    "standard-version": "^9.5.0",
+    "tslib": "^2.8.1",
+    "typescript": "^5.9.2",
+    "vite": "^6.3.5",
+    "vite-plugin-dts": "^4.5.4",
+    "vitest": "^3.0.0",
+    "vue": "^3.5.17",
+    "vue-eslint-parser": "^10.4.0",
+    "vue-tsc": "^2.2.12"
+  },
+  "peerDependencies": {
+    "vue": ">=3.3"
+  },
+  "packageManager": "yarn@4.12.0",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.es.js",
+      "require": "./dist/index.js"
+    }
+  }
+}

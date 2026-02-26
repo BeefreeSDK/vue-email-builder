@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["src/**/*", "src/**/*.vue", "example/**/*", "example/**/*.vue", "vite.config.ts", "vite.lib.config.ts", "vitest.config.ts", "eslint.config.mjs"]
+}

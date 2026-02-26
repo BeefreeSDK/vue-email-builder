@@ -1,0 +1,46 @@
+# Source files
+src/
+example/
+
+# Tests
+**/__tests__/
+**/*.test.ts
+**/*.spec.ts
+*.test.ts
+*.spec.ts
+coverage/
+
+# Development
+.husky/
+.github/
+vite.lib.config.ts
+vite.config.ts
+vitest.config.ts
+eslint.config.mjs
+tsconfig.json
+tsconfig.eslint.json
+.commitlintrc.json
+.nvmrc
+.env
+.env.*
+.DS_Store
+
+# Documentation
+CONTRIBUTING.md
+SECURITY.md
+
+# Git
+.git/
+.gitignore
+
+# Yarn
+yarn.lock
+yarn-error.log
+.yalc/
+yalc.lock
+.yarn/
+.yarnrc.yml
+
+# Npm
+npm-debug.log
+node_modules/

@@ -3,5 +3,14 @@
   "compilerOptions": {
     "noEmit": true
   },
-  "include": ["src/**/*", "src/**/*.vue", "example/**/*", "example/**/*.vue", "vite.config.ts", "vite.lib.config.ts", "vitest.config.ts", "eslint.config.mjs"]
+  "include": [
+    "src/**/*",
+    "src/**/*.vue",
+    "example/**/*",
+    "example/**/*.vue",
+    "vite.config.ts",
+    "vite.lib.config.ts",
+    "vitest.config.ts",
+    "eslint.config.mjs"
+  ]
 }

@@ -11,11 +11,12 @@ describe('environment', () => {
     expect(environment.emailBuilder).toHaveProperty('clientId')
     expect(environment.emailBuilder).toHaveProperty('clientSecret')
     expect(environment.emailBuilder).toHaveProperty('userId')
-    expect(environment.emailBuilder).toHaveProperty('templateUrl')
+    expect(environment.emailBuilder).toHaveProperty('sampleTemplateUrl')
+    expect(environment.emailBuilder).toHaveProperty('blankTemplateUrl')
   })
 
   it('has pageBuilder, popupBuilder, fileManager configs with required keys', () => {
-    const keys = ['clientId', 'clientSecret', 'userId', 'templateUrl']
+    const keys = ['clientId', 'clientSecret', 'userId', 'sampleTemplateUrl', 'blankTemplateUrl']
     for (const name of ['pageBuilder', 'popupBuilder', 'fileManager']) {
       const config = environment[name as keyof typeof environment]
       expect(config).toBeDefined()
@@ -34,5 +35,8 @@ describe('environment', () => {
     expect(env.pageBuilder.userId).toBe('your-user-id')
     expect(env.popupBuilder.userId).toBe('your-user-id')
     expect(env.fileManager.userId).toBe('your-user-id')
+    expect(env.emailBuilder.sampleTemplateUrl).toBe('https://rsrc.getbee.io/api/templates/m-bee')
+    expect(env.fileManager.sampleTemplateUrl).toBe('')
+    expect(env.emailBuilder.blankTemplateUrl).toBe('/templates/blank-template.json')
   })
 })

@@ -1,39 +1,41 @@
 <template>
   <div class="beefree-example">
     <div v-if="credentialsError" class="credentials-notice">
-      <h2>{{ i18nStrings.title }}</h2>
+      <h2>{{ credentialsStrings.title }}</h2>
       <p>
         <template v-for="(seg, i) in descriptionSegments" :key="i">
           <strong v-if="seg.style === 'bold'">{{ seg.text }}</strong>
           <code v-else-if="seg.style === 'code'">{{ seg.text }}</code>
-          <template v-else>{{ seg.text }}</template>
+          <template v-else>
+            {{ seg.text }}
+          </template>
         </template>
       </p>
       <ol>
         <li>
           <a href="https://developers.beefree.io/console" target="_blank" rel="noopener">
-            {{ i18nStrings.step1 }}
+            {{ credentialsStrings.step1 }}
           </a>
         </li>
-        <li>{{ i18nStrings.step2 }}</li>
-        <li>{{ i18nStrings.step3 }}</li>
+        <li>{{ credentialsStrings.step2 }}</li>
+        <li>{{ credentialsStrings.step3 }}</li>
       </ol>
       <p>
-        {{ i18nStrings.docs }}
+        {{ credentialsStrings.docs }}
         <a href="https://docs.beefree.io/get-started" target="_blank" rel="noopener">
-          Getting Started guide
-        </a>.
+          {{ credentialsStrings.gettingStartedGuide }} </a
+        >.
       </p>
-      <button @click="refreshToken">{{ i18nStrings.retry }}</button>
+      <button @click="refreshToken">
+        {{ exampleStrings.retry }}
+      </button>
     </div>
 
-    <div v-else-if="isLoadingToken" class="loading">
-      Loading {{ builderType }}...
-    </div>
+    <div v-else-if="isLoadingToken" class="loading">{{ loadingLabel }}</div>
 
     <div v-else-if="tokenError" class="error">
       <p>{{ tokenError }}</p>
-      <button @click="refreshToken">Retry</button>
+      <button @click="refreshToken">{{ exampleStrings.retry }}</button>
     </div>
 
     <div
@@ -49,20 +51,30 @@
       >
         <div class="controls">
           <div class="button-group">
-            <button :disabled="!builderReady || isExecuting" @click="onPreview(MAIN_CONTAINER)">
-              Preview
+            <button
+              :disabled="!builderReady || isExecuting || builderType === 'fileManager'"
+              @click="onPreview(MAIN_CONTAINER)"
+            >
+              {{ exampleStrings.preview }}
             </button>
-            <button :disabled="!builderReady || isExecuting" @click="onSave(MAIN_CONTAINER)">
-              Save
+            <button
+              :disabled="!builderReady || isExecuting || builderType === 'fileManager'"
+              @click="onSave(MAIN_CONTAINER)"
+            >
+              {{ exampleStrings.save }}
             </button>
-            <button :disabled="!builderReady || isExecuting" @click="onSaveAsTemplate(MAIN_CONTAINER)">
-              Save as Template
+            <button
+              :disabled="!builderReady || isExecuting || builderType === 'fileManager'"
+              @click="onSaveAsTemplate(MAIN_CONTAINER)"
+            >
+              {{ exampleStrings.saveAsTemplate }}
             </button>
-            <button v-if="!isShared" :disabled="!builderReady || isExecuting" @click="loadSampleTemplate">
-              Load Sample Template
-            </button>
-            <button :disabled="!builderReady || isExecuting" @click="exportTemplateJson(MAIN_CONTAINER)">
-              Export JSON
+            <button
+              v-if="!isShared"
+              :disabled="!builderReady || isExecuting || builderType === 'fileManager'"
+              @click="onLoadTemplateButton"
+            >
+              {{ loadTemplateButtonLabel }}
             </button>
           </div>
         </div>
@@ -90,7 +102,7 @@
           :aria-valuenow="splitPosition"
           :aria-valuemin="25"
           :aria-valuemax="75"
-          aria-label="Resize panels"
+          :aria-label="exampleStrings.resizePanels"
           tabindex="0"
           @mousedown="onDividerMouseDown"
           @keydown="onDividerKeyDown"
@@ -99,22 +111,28 @@
         </div>
         <div
           class="builder-panel"
-          :style="{ width: (100 - splitPosition) + '%' }"
+          :style="{ width: 100 - splitPosition + '%' }"
           :class="{ dragging: isDragging }"
         >
           <div class="controls">
             <div class="button-group">
-              <button :disabled="!builderReady || isExecuting" @click="onPreview(CO_EDITING_CONTAINER)">
-                Preview
+              <button
+                :disabled="!builderReady || isExecuting || builderType === 'fileManager'"
+                @click="onPreview(CO_EDITING_CONTAINER)"
+              >
+                {{ exampleStrings.preview }}
               </button>
-              <button :disabled="!builderReady || isExecuting" @click="onSave(CO_EDITING_CONTAINER)">
-                Save
+              <button
+                :disabled="!builderReady || isExecuting || builderType === 'fileManager'"
+                @click="onSave(CO_EDITING_CONTAINER)"
+              >
+                {{ exampleStrings.save }}
               </button>
-              <button :disabled="!builderReady || isExecuting" @click="onSaveAsTemplate(CO_EDITING_CONTAINER)">
-                Save as Template
-              </button>
-              <button :disabled="!builderReady || isExecuting" @click="exportTemplateJson(CO_EDITING_CONTAINER)">
-                Export JSON
+              <button
+                :disabled="!builderReady || isExecuting || builderType === 'fileManager'"
+                @click="onSaveAsTemplate(CO_EDITING_CONTAINER)"
+              >
+                {{ exampleStrings.saveAsTemplate }}
               </button>
             </div>
           </div>
@@ -131,7 +149,7 @@
                 @bb-error="onBuilderError"
               />
             </template>
-            <div v-else class="loading">Joining session...</div>
+            <div v-else class="loading">{{ exampleStrings.joiningSession }}</div>
           </div>
         </div>
       </template>
@@ -149,29 +167,9 @@ import { Builder, useBuilder } from '@beefree.io/vue-email-builder'
 import type { IToken, IEntityContentJson, BeePluginError } from '@beefree.io/sdk/dist/types/bee'
 import { getBuilderToken } from './beefree-token'
 import { environment } from './environment'
-
-import i18nEnUS from './i18n/en-US.json'
-import i18nItIT from './i18n/it-IT.json'
-import i18nEsES from './i18n/es-ES.json'
-import i18nFrFR from './i18n/fr-FR.json'
-import i18nDeDE from './i18n/de-DE.json'
-import i18nPtBR from './i18n/pt-BR.json'
-import i18nIdID from './i18n/id-ID.json'
-import i18nJaJP from './i18n/ja-JP.json'
-import i18nZhCN from './i18n/zh-CN.json'
-import i18nZhHK from './i18n/zh-HK.json'
-import i18nCsCZ from './i18n/cs-CZ.json'
-import i18nNbNO from './i18n/nb-NO.json'
-import i18nDaDK from './i18n/da-DK.json'
-import i18nSvSE from './i18n/sv-SE.json'
-import i18nPlPL from './i18n/pl-PL.json'
-import i18nHuHU from './i18n/hu-HU.json'
-import i18nRuRU from './i18n/ru-RU.json'
-import i18nKoKR from './i18n/ko-KR.json'
-import i18nNlNL from './i18n/nl-NL.json'
-import i18nFiFI from './i18n/fi-FI.json'
-import i18nRoRO from './i18n/ro-RO.json'
-import i18nSlSI from './i18n/sl-SI.json'
+import { messages } from './i18n'
+import type { LocaleCode } from './i18n'
+import { downloadFile } from './utils'
 
 const MAIN_CONTAINER = 'beefree-sdk-builder'
 const CO_EDITING_CONTAINER = 'beefree-sdk-builder-2'
@@ -183,7 +181,7 @@ interface DescriptionSegment {
 
 const props = defineProps<{
   builderType: BuilderType
-  builderLanguage: string
+  builderLanguage: LocaleCode
 }>()
 
 const emit = defineEmits<{
@@ -192,7 +190,7 @@ const emit = defineEmits<{
 
 const beefreeToken = ref<IToken | null>(null)
 const isLoadingToken = ref(true)
-const tokenError = ref<string | null>(null)
+const tokenErrorType = ref<BuilderType | null>(null)
 const credentialsError = ref(false)
 const isExecuting = ref(false)
 
@@ -203,71 +201,38 @@ const splitPosition = ref(50)
 const isDragging = ref(false)
 const buildersArea = ref<HTMLElement | null>(null)
 const pendingTemplate = ref<IEntityContentJson | null>(null)
+const loadedTemplate = ref<'sample' | 'blank' | null>(null)
 
-const builderReady = computed(() =>
-  !!beefreeToken.value && !credentialsError.value && !tokenError.value && !isLoadingToken.value,
+const builderReady = computed(
+  () =>
+    !!beefreeToken.value && !credentialsError.value && !tokenError.value && !isLoadingToken.value,
 )
 
 // --- i18n ---
 
-const defaultContentLanguage = { label: 'en-US', value: 'en-US' }
-
-const additionalContentLanguages = [
-  { label: 'it-IT', value: 'it-IT' },
-  { label: 'es-ES', value: 'es-ES' },
-  { label: 'fr-FR', value: 'fr-FR' },
-  { label: 'de-DE', value: 'de-DE' },
-  { label: 'pt-BR', value: 'pt-BR' },
-  { label: 'id-ID', value: 'id-ID' },
-  { label: 'ja-JP', value: 'ja-JP' },
-  { label: 'zh-CN', value: 'zh-CN' },
-  { label: 'zh-HK', value: 'zh-HK' },
-  { label: 'cs-CZ', value: 'cs-CZ' },
-  { label: 'nb-NO', value: 'nb-NO' },
-  { label: 'da-DK', value: 'da-DK' },
-  { label: 'sv-SE', value: 'sv-SE' },
-  { label: 'pl-PL', value: 'pl-PL' },
-  { label: 'hu-HU', value: 'hu-HU' },
-  { label: 'ru-RU', value: 'ru-RU' },
-  { label: 'ko-KR', value: 'ko-KR' },
-  { label: 'nl-NL', value: 'nl-NL' },
-  { label: 'fi-FI', value: 'fi-FI' },
-  { label: 'ro-RO', value: 'ro-RO' },
-  { label: 'sl-SI', value: 'sl-SI' },
-]
-
-const i18nMap: Record<string, typeof i18nEnUS> = {
-  'en-US': i18nEnUS,
-  'it-IT': i18nItIT,
-  'es-ES': i18nEsES,
-  'fr-FR': i18nFrFR,
-  'de-DE': i18nDeDE,
-  'pt-BR': i18nPtBR,
-  'id-ID': i18nIdID,
-  'ja-JP': i18nJaJP,
-  'zh-CN': i18nZhCN,
-  'zh-HK': i18nZhHK,
-  'cs-CZ': i18nCsCZ,
-  'nb-NO': i18nNbNO,
-  'da-DK': i18nDaDK,
-  'sv-SE': i18nSvSE,
-  'pl-PL': i18nPlPL,
-  'hu-HU': i18nHuHU,
-  'ru-RU': i18nRuRU,
-  'ko-KR': i18nKoKR,
-  'nl-NL': i18nNlNL,
-  'fi-FI': i18nFiFI,
-  'ro-RO': i18nRoRO,
-  'sl-SI': i18nSlSI,
-}
-
-const i18nStrings = computed(() =>
-  (i18nMap[props.builderLanguage] ?? i18nEnUS).credentials,
+const localeStrings = computed(() => messages[props.builderLanguage] ?? messages['en-US'])
+const appStrings = computed(() => localeStrings.value.app)
+const exampleStrings = computed(() => localeStrings.value.example)
+const credentialsStrings = computed(() => localeStrings.value.credentials)
+const localizedBuilderType = computed(() => appStrings.value.builderTypes[props.builderType])
+const tokenError = computed(() =>
+  tokenErrorType.value
+    ? formatMessage(exampleStrings.value.loadFailed, {
+        type: appStrings.value.builderTypes[tokenErrorType.value],
+      })
+    : null,
 )
+const loadingLabel = computed(() =>
+  formatMessage(exampleStrings.value.loading, { type: localizedBuilderType.value }),
+)
+
+function formatMessage(template: string, values: Record<string, string>): string {
+  return template.replace(/\{(\w+)\}/g, (_, key: string) => values[key] ?? `{${key}}`)
+}
 
 function interpolate(template: string): DescriptionSegment[] {
   const placeholderMap: Record<string, { text: string; style: 'bold' | 'code' }> = {
-    type: { text: props.builderType, style: 'bold' },
+    type: { text: localizedBuilderType.value, style: 'bold' },
     clientId: { text: 'VITE_*_CLIENT_ID', style: 'code' },
     clientSecret: { text: 'VITE_*_CLIENT_SECRET', style: 'code' },
     envFile: { text: 'example/.env', style: 'code' },
@@ -298,27 +263,25 @@ function interpolate(template: string): DescriptionSegment[] {
   return segments
 }
 
-const descriptionSegments = computed(() =>
-  interpolate(i18nStrings.value.description),
-)
+const descriptionSegments = computed(() => interpolate(credentialsStrings.value.description))
 
 // --- Builder event handlers ---
 
 function onBuilderSave(args: [string, string, string | null, number, string | null]) {
-  const [pageJson, pageHtml, ampHtml, templateVersion, language] = args
-  console.log('onSave:', { pageJson, pageHtml, ampHtml, templateVersion, language })
-  emit('notify', 'Check console for details.', 'success', 'Design saved')
+  const [, pageHtml] = args
+  downloadFile(`design-${Date.now()}.html`, pageHtml, 'text/html;charset=utf-8')
 }
 
 function onBuilderSaveAsTemplate(args: [string, number]) {
-  const [pageJson, templateVersion] = args
-  console.log('onSaveAsTemplate:', { pageJson, templateVersion })
-  emit('notify', 'Check console for details.', 'success', 'Design saved as template')
+  const [pageJson] = args
+  const parsed = typeof pageJson === 'string' ? JSON.parse(pageJson) : pageJson
+  const content = JSON.stringify(parsed, null, 2)
+  downloadFile(`template-${Date.now()}.json`, content, 'application/json')
 }
 
 function onBuilderSend(htmlFile: string) {
   console.log('onSend:', htmlFile)
-  emit('notify', 'Check console for details.', 'success', 'Template sent')
+  emit('notify', exampleStrings.value.checkConsole, 'success', exampleStrings.value.templateSent)
 }
 
 function onBuilderError(error: unknown) {
@@ -326,9 +289,9 @@ function onBuilderError(error: unknown) {
   console.error('Beefree error:', pluginError)
   const msg = pluginError.message || JSON.stringify(pluginError)
   if (/co.?editing/i.test(msg) && /(superpowers|enterprise)/i.test(msg)) {
-    emit('notify', 'Co-editing is only available on Superpowers or Enterprise plans.', 'error')
+    emit('notify', exampleStrings.value.coEditingPlanError, 'error', exampleStrings.value.error)
   } else {
-    emit('notify', msg, 'error', 'Error')
+    emit('notify', msg, 'error', exampleStrings.value.error)
   }
 }
 
@@ -341,8 +304,6 @@ const clientConfig = reactive({
   username: 'User 1',
   userColor: '#00aced',
   userHandle: 'user1',
-  templateLanguage: defaultContentLanguage,
-  templateLanguages: additionalContentLanguages,
 })
 
 const coEditingConfig = reactive({
@@ -352,8 +313,6 @@ const coEditingConfig = reactive({
   username: 'User 2',
   userColor: '#000000',
   userHandle: 'user2',
-  templateLanguage: defaultContentLanguage,
-  templateLanguages: additionalContentLanguages,
 })
 
 // --- Builder composables ---
@@ -368,17 +327,17 @@ function getBuilderForContainer(containerId: string) {
 // --- Auth ---
 
 function isAuthError(error: unknown): boolean {
-  return error instanceof Error
-    && (
-      /^Authentication failed: [45]\d{2}\b/.test(error.message)
-      || error.message.startsWith('Invalid credentials:')
-    )
+  return (
+    error instanceof Error &&
+    (/^Authentication failed: [45]\d{2}\b/.test(error.message) ||
+      error.message.startsWith('Invalid credentials:'))
+  )
 }
 
 async function loadBeefreeToken(builderType: BuilderType) {
   try {
     isLoadingToken.value = true
-    tokenError.value = null
+    tokenErrorType.value = null
     credentialsError.value = false
 
     const token = await getBuilderToken(
@@ -393,7 +352,7 @@ async function loadBeefreeToken(builderType: BuilderType) {
     if (isAuthError(error)) {
       credentialsError.value = true
     } else {
-      tokenError.value = `Failed to load ${builderType}. Please try again.`
+      tokenErrorType.value = builderType
     }
   } finally {
     isLoadingToken.value = false
@@ -409,39 +368,52 @@ async function refreshToken() {
 async function loadSampleTemplate() {
   try {
     isExecuting.value = true
-    const response = await fetch(environment[props.builderType].templateUrl)
+    const response = await fetch(environment[props.builderType].sampleTemplateUrl)
     if (!response.ok) {
       throw new Error(`Failed to load template: ${response.status} ${response.statusText}`)
     }
-    const sampleTemplate: { json: IEntityContentJson } = await response.json()
-    primaryBuilder.load(sampleTemplate.json)
+    const template = (await response.json()) as IEntityContentJson
+    primaryBuilder.load(template)
+    loadedTemplate.value = 'sample'
   } catch (error) {
     const msg = error instanceof Error ? error.message : 'Unknown error'
     console.error('Load template failed:', error)
-    emit('notify', msg, 'error', 'Load failed')
+    emit('notify', msg, 'error', exampleStrings.value.loadFailedTitle)
   } finally {
     isExecuting.value = false
   }
 }
 
-async function exportTemplateJson(containerId: string) {
+async function loadBlankTemplate() {
   try {
     isExecuting.value = true
-    const builder = getBuilderForContainer(containerId)
-    const json = await builder.getTemplateJson()
-    const blob = new Blob([JSON.stringify(json, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `template-${Date.now()}.json`
-    a.click()
-    URL.revokeObjectURL(url)
+    const response = await fetch(environment[props.builderType].blankTemplateUrl)
+    if (!response.ok) {
+      throw new Error(`Failed to load blank template: ${response.status} ${response.statusText}`)
+    }
+    const template = (await response.json()) as IEntityContentJson
+    primaryBuilder.load(template)
+    loadedTemplate.value = 'blank'
   } catch (error) {
     const msg = error instanceof Error ? error.message : 'Unknown error'
-    console.error('Export failed:', error)
-    emit('notify', msg, 'error', 'Export failed')
+    console.error('Load blank template failed:', error)
+    emit('notify', msg, 'error', exampleStrings.value.loadFailedTitle)
   } finally {
     isExecuting.value = false
+  }
+}
+
+const loadTemplateButtonLabel = computed(() =>
+  loadedTemplate.value === 'sample'
+    ? exampleStrings.value.loadBlankTemplate
+    : exampleStrings.value.loadSampleTemplate,
+)
+
+function onLoadTemplateButton() {
+  if (loadedTemplate.value === 'sample') {
+    loadBlankTemplate()
+  } else {
+    loadSampleTemplate()
   }
 }
 
@@ -499,9 +471,10 @@ function reinitializeBuilder() {
   }
 }
 
-function onSessionStarted(event: { sessionId?: string }) {
-  if (event?.sessionId) {
-    sessionId.value = event.sessionId
+function onSessionStarted(event: unknown) {
+  const maybeEvent = event as { sessionId?: string } | undefined
+  if (maybeEvent?.sessionId) {
+    sessionId.value = maybeEvent.sessionId
     fetchSecondToken()
   }
 }
@@ -555,24 +528,31 @@ function onDividerKeyDown(e: KeyboardEvent) {
 
 // --- Watchers ---
 
-watch(() => props.builderType, async (newType) => {
-  pendingTemplate.value = null
-  if (isShared.value) {
-    stopCoEditing()
-  }
-  await loadBeefreeToken(newType)
-})
-
-watch(() => props.builderLanguage, (lang) => {
-  clientConfig.language = lang
-  coEditingConfig.language = lang
-  if (builderReady.value) {
-    primaryBuilder.loadConfig({ language: lang })
+watch(
+  () => props.builderType,
+  async (newType) => {
+    pendingTemplate.value = null
+    loadedTemplate.value = null
     if (isShared.value) {
-      coEditingBuilder.loadConfig({ language: lang })
+      stopCoEditing()
     }
-  }
-})
+    await loadBeefreeToken(newType)
+  },
+)
+
+watch(
+  () => props.builderLanguage,
+  (lang) => {
+    clientConfig.language = lang
+    coEditingConfig.language = lang
+    if (builderReady.value) {
+      primaryBuilder.loadConfig({ language: lang })
+      if (isShared.value) {
+        coEditingBuilder.loadConfig({ language: lang })
+      }
+    }
+  },
+)
 
 onMounted(async () => {
   await loadBeefreeToken(props.builderType)
@@ -650,7 +630,8 @@ defineExpose<{
   opacity: 0.8;
 }
 
-.loading, .error {
+.loading,
+.error {
   text-align: center;
   padding: 40px;
 }

@@ -8,7 +8,7 @@ const BuilderStub = {
   name: 'Builder',
   template: `<div class="builder-stub">
     <button class="emit-save" @click="$emit('bb-save', '', '', null, 1, null)">Save</button>
-    <button class="emit-save-as-template" @click="$emit('bb-save-as-template', '', 1)">SaveAsTemplate</button>
+    <button class="emit-save-as-template" @click="$emit('bb-save-as-template', [JSON.stringify({ page: {} }), 1])">SaveAsTemplate</button>
     <button class="emit-send" @click="$emit('bb-send', '')">Send</button>
     <button class="emit-error-coedit" @click="$emit('bb-error', { message: 'co-editing requires superpowers or enterprise' })">Err</button>
     <button class="emit-error-generic" @click="$emit('bb-error', { message: 'Generic error' })">Err2</button>
@@ -22,7 +22,9 @@ describe('BeefreeExample', () => {
       props: { builderType: 'emailBuilder', builderLanguage: 'en-US' },
       global: { stubs: { Builder: true } },
     })
-    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), { timeout: 3000 })
+    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), {
+      timeout: 3000,
+    })
     expect(wrapper.find('.builder-panel').exists()).toBe(true)
   })
 
@@ -54,7 +56,9 @@ describe('BeefreeExample', () => {
       props: { builderType: 'emailBuilder', builderLanguage: 'en-US' },
       global: { stubs: { Builder: true } },
     })
-    await waitFor(() => expect(wrapper.find('.credentials-notice').exists()).toBe(true), { timeout: 2000 })
+    await waitFor(() => expect(wrapper.find('.credentials-notice').exists()).toBe(true), {
+      timeout: 2000,
+    })
     expect(wrapper.find('.credentials-notice h2').text()).toContain('Invalid')
     expect(wrapper.find('.credentials-notice button').text()).toBe('Retry')
     expect(wrapper.find('.credentials-notice p strong').exists()).toBe(true)
@@ -71,7 +75,9 @@ describe('BeefreeExample', () => {
       props: { builderType: 'emailBuilder', builderLanguage: 'xx-YY' },
       global: { stubs: { Builder: true } },
     })
-    await waitFor(() => expect(wrapper.find('.credentials-notice').exists()).toBe(true), { timeout: 2000 })
+    await waitFor(() => expect(wrapper.find('.credentials-notice').exists()).toBe(true), {
+      timeout: 2000,
+    })
     expect(wrapper.find('.credentials-notice h2').text()).toBe('Invalid or missing credentials')
   })
 
@@ -85,7 +91,9 @@ describe('BeefreeExample', () => {
       props: { builderType: 'emailBuilder', builderLanguage: 'ja-JP' },
       global: { stubs: { Builder: true } },
     })
-    await waitFor(() => expect(wrapper.find('.credentials-notice').exists()).toBe(true), { timeout: 2000 })
+    await waitFor(() => expect(wrapper.find('.credentials-notice').exists()).toBe(true), {
+      timeout: 2000,
+    })
     // First chunk is placeholder-driven, so <strong> should exist at start.
     expect(wrapper.find('.credentials-notice p strong').exists()).toBe(true)
   })
@@ -104,12 +112,15 @@ describe('BeefreeExample', () => {
 
   it('shows loading state while token is loading', async () => {
     let resolveToken: (v: unknown) => void
-    const tokenPromise = new Promise((r) => { resolveToken = r })
-    vi.mocked(fetch).mockImplementationOnce(() =>
-      tokenPromise.then((body) => ({
-        ok: true,
-        json: () => Promise.resolve(body),
-      })) as Promise<Response>,
+    const tokenPromise = new Promise((r) => {
+      resolveToken = r
+    })
+    vi.mocked(fetch).mockImplementationOnce(
+      () =>
+        tokenPromise.then((body) => ({
+          ok: true,
+          json: () => Promise.resolve(body),
+        })) as Promise<Response>,
     )
     const wrapper = mount(BeefreeExample, {
       props: { builderType: 'emailBuilder', builderLanguage: 'en-US' },
@@ -119,23 +130,28 @@ describe('BeefreeExample', () => {
     expect(wrapper.find('.loading').exists()).toBe(true)
     resolveToken!({ access_token: 't', v2: true })
     await tokenPromise
-    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), { timeout: 2000 })
+    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), {
+      timeout: 2000,
+    })
   })
 
-  it('emits notify on bb-save, bb-save-as-template, bb-send', async () => {
+  it('handles bb-save and bb-save-as-template downloads and emits notify on bb-send', async () => {
     const wrapper = mount(BeefreeExample, {
       props: { builderType: 'emailBuilder', builderLanguage: 'en-US' },
       global: { stubs: { Builder: BuilderStub } },
     })
-    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), { timeout: 3000 })
+    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), {
+      timeout: 3000,
+    })
     const stub = wrapper.find('.builder-stub')
     await stub.find('.emit-save').trigger('click')
-    await wrapper.vm.$nextTick()
-    expect(wrapper.emitted('notify')).toBeTruthy()
     await stub.find('.emit-save-as-template').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(globalThis.URL.createObjectURL).toHaveBeenCalled()
+    expect(wrapper.emitted('notify')).toBeFalsy()
     await stub.find('.emit-send').trigger('click')
     await wrapper.vm.$nextTick()
-    expect(wrapper.emitted('notify')!.length).toBeGreaterThanOrEqual(2)
+    expect(wrapper.emitted('notify')!.length).toBe(1)
   })
 
   it('emits notify with co-editing message when bb-error has co-editing message', async () => {
@@ -143,11 +159,15 @@ describe('BeefreeExample', () => {
       props: { builderType: 'emailBuilder', builderLanguage: 'en-US' },
       global: { stubs: { Builder: BuilderStub } },
     })
-    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), { timeout: 3000 })
+    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), {
+      timeout: 3000,
+    })
     await wrapper.find('.builder-stub').find('.emit-error-coedit').trigger('click')
     await wrapper.vm.$nextTick()
     const emitted = wrapper.emitted('notify')!
-    expect(emitted.some((e) => e[0]?.includes('Superpowers') || e[0]?.includes('Enterprise'))).toBe(true)
+    expect(emitted.some((e) => e[0]?.includes('Superpowers') || e[0]?.includes('Enterprise'))).toBe(
+      true,
+    )
   })
 
   it('emits notify with error title when bb-error is generic', async () => {
@@ -155,7 +175,9 @@ describe('BeefreeExample', () => {
       props: { builderType: 'emailBuilder', builderLanguage: 'en-US' },
       global: { stubs: { Builder: BuilderStub } },
     })
-    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), { timeout: 3000 })
+    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), {
+      timeout: 3000,
+    })
     await wrapper.find('.builder-stub').find('.emit-error-generic').trigger('click')
     await wrapper.vm.$nextTick()
     expect(wrapper.emitted('notify')?.[0]?.[1]).toBe('error')
@@ -167,10 +189,27 @@ describe('BeefreeExample', () => {
       props: { builderType: 'emailBuilder', builderLanguage: 'en-US' },
       global: { stubs: { Builder: BuilderStub } },
     })
-    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), { timeout: 3000 })
+    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), {
+      timeout: 3000,
+    })
     wrapper.findComponent({ name: 'Builder' }).vm.$emit('bb-error', { code: 999 })
     await wrapper.vm.$nextTick()
     expect(wrapper.emitted('notify')?.[0]?.[0]).toContain('"code":999')
+  })
+
+  it('handles bb-save-as-template when pageJson payload is already an object', async () => {
+    const wrapper = mount(BeefreeExample, {
+      props: { builderType: 'emailBuilder', builderLanguage: 'en-US' },
+      global: { stubs: { Builder: BuilderStub } },
+    })
+    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), {
+      timeout: 3000,
+    })
+    wrapper
+      .findComponent({ name: 'Builder' })
+      .vm.$emit('bb-save-as-template', [{ page: { title: 'x' } }, 1])
+    await wrapper.vm.$nextTick()
+    expect(globalThis.URL.createObjectURL).toHaveBeenCalled()
   })
 
   it('loadSampleTemplate fetches template and calls load', async () => {
@@ -178,13 +217,15 @@ describe('BeefreeExample', () => {
       props: { builderType: 'emailBuilder', builderLanguage: 'en-US' },
       global: { stubs: { Builder: true } },
     })
-    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), { timeout: 3000 })
+    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), {
+      timeout: 3000,
+    })
     vi.mocked(fetch).mockImplementation((input: RequestInfo | URL) => {
       const url = typeof input === 'string' ? input : input.toString()
       if (url.includes('rsrc.getbee.io') || url.includes('api/templates')) {
         return Promise.resolve({
           ok: true,
-          json: () => Promise.resolve({ json: { page: {} } }),
+          json: () => Promise.resolve({ page: {} }),
         } as Response)
       }
       return Promise.resolve({
@@ -202,7 +243,9 @@ describe('BeefreeExample', () => {
       props: { builderType: 'emailBuilder', builderLanguage: 'en-US' },
       global: { stubs: { Builder: true } },
     })
-    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), { timeout: 3000 })
+    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), {
+      timeout: 3000,
+    })
     vi.mocked(fetch).mockImplementation((input: RequestInfo | URL) => {
       const url = typeof input === 'string' ? input : input.toString()
       if (url.includes('rsrc.getbee.io') || url.includes('api/templates')) {
@@ -224,7 +267,9 @@ describe('BeefreeExample', () => {
       props: { builderType: 'emailBuilder', builderLanguage: 'en-US' },
       global: { stubs: { Builder: true } },
     })
-    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), { timeout: 3000 })
+    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), {
+      timeout: 3000,
+    })
     vi.mocked(fetch).mockImplementation((input: RequestInfo | URL) => {
       const url = typeof input === 'string' ? input : input.toString()
       if (url.includes('rsrc.getbee.io') || url.includes('api/templates')) {
@@ -241,51 +286,136 @@ describe('BeefreeExample', () => {
     expect(wrapper.emitted('notify')?.[0]?.[0]).toBe('Unknown error')
   })
 
-  it('exportTemplateJson emits notify on failure when getTemplateJson rejects', async () => {
-    setSDKInstanceToRegistry('beefree-sdk-builder', {
-      getTemplateJson: vi.fn().mockRejectedValue(new Error('Export failed')),
-    } as never)
+  it('disables control bar actions for fileManager', async () => {
     const wrapper = mount(BeefreeExample, {
-      props: { builderType: 'emailBuilder', builderLanguage: 'en-US' },
+      props: { builderType: 'fileManager', builderLanguage: 'en-US' },
       global: { stubs: { Builder: true } },
     })
-    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), { timeout: 3000 })
-    const exportBtn = wrapper.findAll('button').find((b) => b.text() === 'Export JSON')
-    await exportBtn!.trigger('click')
-    await waitFor(() => expect(wrapper.emitted('notify')).toBeTruthy())
-    expect(wrapper.emitted('notify')?.[0]?.[2]).toBe('Export failed')
+    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), {
+      timeout: 3000,
+    })
+
+    const previewBtn = wrapper.findAll('button').find((b) => b.text() === 'Preview')
+    const saveBtn = wrapper.findAll('button').find((b) => b.text() === 'Save')
+    const saveAsTemplateBtn = wrapper.findAll('button').find((b) => b.text() === 'Save as Template')
+    const loadTemplateBtn = wrapper
+      .findAll('button')
+      .find((b) => b.text() === 'Load Sample Template')
+
+    expect(previewBtn?.attributes('disabled')).toBeDefined()
+    expect(saveBtn?.attributes('disabled')).toBeDefined()
+    expect(saveAsTemplateBtn?.attributes('disabled')).toBeDefined()
+    expect(loadTemplateBtn?.attributes('disabled')).toBeDefined()
   })
 
-  it('exportTemplateJson uses Unknown error message for non-Error failures', async () => {
-    setSDKInstanceToRegistry('beefree-sdk-builder', {
-      getTemplateJson: vi.fn().mockRejectedValue('bad-export'),
-    } as never)
+  it('toggles load-template button label after sample and blank loads', async () => {
     const wrapper = mount(BeefreeExample, {
       props: { builderType: 'emailBuilder', builderLanguage: 'en-US' },
       global: { stubs: { Builder: true } },
     })
-    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), { timeout: 3000 })
-    const exportBtn = wrapper.findAll('button').find((b) => b.text() === 'Export JSON')
-    await exportBtn!.trigger('click')
+    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), {
+      timeout: 3000,
+    })
+    vi.mocked(fetch).mockImplementation((input: RequestInfo | URL) => {
+      const url = typeof input === 'string' ? input : input.toString()
+      if (url.includes('api/templates')) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ page: {} }) } as Response)
+      }
+      if (url.includes('/templates/blank-template.json')) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ page: {} }) } as Response)
+      }
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ access_token: 'mock-token', v2: true }),
+      } as Response)
+    })
+
+    const loadBtn = wrapper.findAll('button').find((b) => b.text() === 'Load Sample Template')
+    await loadBtn!.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.findAll('button').some((b) => b.text() === 'Load Blank Template')).toBe(true)
+
+    const blankBtn = wrapper.findAll('button').find((b) => b.text() === 'Load Blank Template')
+    await blankBtn!.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.findAll('button').some((b) => b.text() === 'Load Sample Template')).toBe(true)
+  })
+
+  it('loadBlankTemplate emits notify on fetch failure', async () => {
+    const wrapper = mount(BeefreeExample, {
+      props: { builderType: 'emailBuilder', builderLanguage: 'en-US' },
+      global: { stubs: { Builder: true } },
+    })
+    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), {
+      timeout: 3000,
+    })
+
+    vi.mocked(fetch).mockImplementation((input: RequestInfo | URL) => {
+      const url = typeof input === 'string' ? input : input.toString()
+      if (url.includes('api/templates')) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ page: {} }) } as Response)
+      }
+      if (url.includes('/templates/blank-template.json')) {
+        return Promise.resolve({ ok: false, status: 404, statusText: 'Not Found' } as Response)
+      }
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ access_token: 'mock-token', v2: true }),
+      } as Response)
+    })
+
+    const loadBtn = wrapper.findAll('button').find((b) => b.text() === 'Load Sample Template')
+    await loadBtn!.trigger('click')
+    await wrapper.vm.$nextTick()
+    const blankBtn = wrapper.findAll('button').find((b) => b.text() === 'Load Blank Template')
+    await blankBtn!.trigger('click')
+    await waitFor(() => expect(wrapper.emitted('notify')).toBeTruthy())
+    expect(wrapper.emitted('notify')?.[0]?.[2]).toBe('Load failed')
+  })
+
+  it('loadBlankTemplate uses Unknown error for non-Error failures', async () => {
+    const wrapper = mount(BeefreeExample, {
+      props: { builderType: 'emailBuilder', builderLanguage: 'en-US' },
+      global: { stubs: { Builder: true } },
+    })
+    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), {
+      timeout: 3000,
+    })
+
+    vi.mocked(fetch).mockImplementation((input: RequestInfo | URL) => {
+      const url = typeof input === 'string' ? input : input.toString()
+      if (url.includes('api/templates')) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ page: {} }) } as Response)
+      }
+      if (url.includes('/templates/blank-template.json')) {
+        return Promise.reject('blank-fetch-failed')
+      }
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ access_token: 'mock-token', v2: true }),
+      } as Response)
+    })
+
+    const loadBtn = wrapper.findAll('button').find((b) => b.text() === 'Load Sample Template')
+    await loadBtn!.trigger('click')
+    await wrapper.vm.$nextTick()
+    const blankBtn = wrapper.findAll('button').find((b) => b.text() === 'Load Blank Template')
+    await blankBtn!.trigger('click')
     await waitFor(() => expect(wrapper.emitted('notify')).toBeTruthy())
     expect(wrapper.emitted('notify')?.[0]?.[0]).toBe('Unknown error')
   })
 
-  it('exportTemplateJson succeeds when instance has getTemplateJson', async () => {
-    setSDKInstanceToRegistry('beefree-sdk-builder', {
-      getTemplateJson: vi.fn().mockResolvedValue({ page: {} }),
-    } as never)
+  it('updates token error copy when language changes', async () => {
+    vi.mocked(fetch).mockRejectedValueOnce(new Error('Network error'))
     const wrapper = mount(BeefreeExample, {
       props: { builderType: 'emailBuilder', builderLanguage: 'en-US' },
       global: { stubs: { Builder: true } },
     })
-    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), { timeout: 3000 })
-    const exportBtn = wrapper.findAll('button').find((b) => b.text() === 'Export JSON')
-    await exportBtn!.trigger('click')
+    await waitFor(() => expect(wrapper.find('.error').exists()).toBe(true), { timeout: 2000 })
+    expect(wrapper.find('.error p').text()).toContain('Failed to load Email Builder')
+    await wrapper.setProps({ builderLanguage: 'it-IT' })
     await wrapper.vm.$nextTick()
-    const notifyCalls = wrapper.emitted('notify') ?? []
-    const exportFailed = notifyCalls.some((c) => c[2] === 'Export failed')
-    expect(exportFailed).toBe(false)
+    expect(wrapper.find('.error p').text()).toContain('Impossibile caricare')
   })
 
   it('Preview, Save, Save as Template buttons call builder methods', async () => {
@@ -293,7 +423,9 @@ describe('BeefreeExample', () => {
       props: { builderType: 'emailBuilder', builderLanguage: 'en-US' },
       global: { stubs: { Builder: true } },
     })
-    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), { timeout: 3000 })
+    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), {
+      timeout: 3000,
+    })
     const previewBtn = wrapper.findAll('button').find((b) => b.text() === 'Preview')
     const saveBtn = wrapper.findAll('button').find((b) => b.text() === 'Save')
     const saveAsBtn = wrapper.findAll('button').find((b) => b.text() === 'Save as Template')
@@ -308,7 +440,9 @@ describe('BeefreeExample', () => {
       props: { builderType: 'emailBuilder', builderLanguage: 'en-US' },
       global: { stubs: { Builder: true } },
     })
-    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), { timeout: 3000 })
+    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), {
+      timeout: 3000,
+    })
     const vm = wrapper.vm as unknown as { toggleCoEditing: () => Promise<void>; isShared: boolean }
     await vm.toggleCoEditing()
     await wrapper.vm.$nextTick()
@@ -330,7 +464,9 @@ describe('BeefreeExample', () => {
       props: { builderType: 'emailBuilder', builderLanguage: 'en-US' },
       global: { stubs: { Builder: true } },
     })
-    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), { timeout: 3000 })
+    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), {
+      timeout: 3000,
+    })
     const vm = wrapper.vm as unknown as { toggleCoEditing: () => Promise<void> }
     vm.toggleCoEditing()
     vm.toggleCoEditing()
@@ -344,7 +480,9 @@ describe('BeefreeExample', () => {
       props: { builderType: 'emailBuilder', builderLanguage: 'en-US' },
       global: { stubs: { Builder: BuilderStub } },
     })
-    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), { timeout: 3000 })
+    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), {
+      timeout: 3000,
+    })
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,
       json: () => Promise.resolve({ access_token: 'second', v2: true }),
@@ -358,7 +496,9 @@ describe('BeefreeExample', () => {
       props: { builderType: 'emailBuilder', builderLanguage: 'en-US' },
       global: { stubs: { Builder: BuilderStub } },
     })
-    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), { timeout: 3000 })
+    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), {
+      timeout: 3000,
+    })
     vi.mocked(fetch).mockClear()
     wrapper.findComponent({ name: 'Builder' }).vm.$emit('bb-session-started', {})
     await wrapper.vm.$nextTick()
@@ -370,17 +510,20 @@ describe('BeefreeExample', () => {
       props: { builderType: 'emailBuilder', builderLanguage: 'en-US' },
       global: { stubs: { Builder: BuilderStub } },
     })
-    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), { timeout: 3000 })
+    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), {
+      timeout: 3000,
+    })
     const vm = wrapper.vm as unknown as { toggleCoEditing: () => Promise<void> }
     await vm.toggleCoEditing()
     await wrapper.find('.builder-stub').find('.emit-session-started').trigger('click')
-    await waitFor(() => expect(wrapper.findAllComponents({ name: 'Builder' }).length).toBeGreaterThanOrEqual(2))
+    await waitFor(() =>
+      expect(wrapper.findAllComponents({ name: 'Builder' }).length).toBeGreaterThanOrEqual(2),
+    )
 
     const secondPanelButtons = wrapper.findAll('.builder-panel')[1].findAll('button')
     await secondPanelButtons.find((b) => b.text() === 'Preview')!.trigger('click')
     await secondPanelButtons.find((b) => b.text() === 'Save')!.trigger('click')
     await secondPanelButtons.find((b) => b.text() === 'Save as Template')!.trigger('click')
-    await secondPanelButtons.find((b) => b.text() === 'Export JSON')!.trigger('click')
   })
 
   it('split divider mouse and keyboard resize', async () => {
@@ -388,9 +531,21 @@ describe('BeefreeExample', () => {
       props: { builderType: 'emailBuilder', builderLanguage: 'en-US' },
       global: { stubs: { Builder: true } },
     })
-    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), { timeout: 3000 })
+    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), {
+      timeout: 3000,
+    })
     const area = wrapper.find('.builders-area').element as HTMLElement
-    area.getBoundingClientRect = () => ({ left: 0, width: 1000, top: 0, height: 600, right: 1000, bottom: 600, x: 0, y: 0, toJSON: () => {} })
+    area.getBoundingClientRect = () => ({
+      left: 0,
+      width: 1000,
+      top: 0,
+      height: 600,
+      right: 1000,
+      bottom: 600,
+      x: 0,
+      y: 0,
+      toJSON: () => {},
+    })
     const vm = wrapper.vm as unknown as { toggleCoEditing: () => Promise<void> }
     await vm.toggleCoEditing()
     await waitFor(() => expect(wrapper.find('.split-divider').exists()).toBe(true))
@@ -410,7 +565,9 @@ describe('BeefreeExample', () => {
       props: { builderType: 'emailBuilder', builderLanguage: 'en-US' },
       global: { stubs: { Builder: true } },
     })
-    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), { timeout: 3000 })
+    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), {
+      timeout: 3000,
+    })
     await wrapper.setProps({ builderType: 'pageBuilder' })
     await waitFor(() => expect(fetch).toHaveBeenCalled())
   })
@@ -420,7 +577,9 @@ describe('BeefreeExample', () => {
       props: { builderType: 'emailBuilder', builderLanguage: 'en-US' },
       global: { stubs: { Builder: true } },
     })
-    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), { timeout: 3000 })
+    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), {
+      timeout: 3000,
+    })
     await wrapper.setProps({ builderLanguage: 'it-IT' })
     await wrapper.vm.$nextTick()
     const builder = wrapper.findComponent({ name: 'Builder' })
@@ -430,7 +589,10 @@ describe('BeefreeExample', () => {
   it('watch builderLanguage skips loadConfig when builder is not ready', async () => {
     let resolveToken!: (value: Response) => void
     vi.mocked(fetch).mockImplementationOnce(
-      () => new Promise((resolve) => { resolveToken = resolve }),
+      () =>
+        new Promise((resolve) => {
+          resolveToken = resolve
+        }),
     )
     const wrapper = mount(BeefreeExample, {
       props: { builderType: 'emailBuilder', builderLanguage: 'en-US' },
@@ -442,7 +604,9 @@ describe('BeefreeExample', () => {
       ok: true,
       json: () => Promise.resolve({ access_token: 'mock-token', v2: true }),
     } as Response)
-    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), { timeout: 3000 })
+    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), {
+      timeout: 3000,
+    })
   })
 
   it('toggleCoEditing returns early when generation changes before first resolve', async () => {
@@ -465,7 +629,9 @@ describe('BeefreeExample', () => {
       props: { builderType: 'emailBuilder', builderLanguage: 'en-US' },
       global: { stubs: { Builder: true } },
     })
-    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), { timeout: 3000 })
+    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), {
+      timeout: 3000,
+    })
     const vm = wrapper.vm as unknown as { toggleCoEditing: () => Promise<void> }
     const p1 = vm.toggleCoEditing()
     const p2 = vm.toggleCoEditing()
@@ -479,7 +645,10 @@ describe('BeefreeExample', () => {
   it('reinitializeBuilder safely handles missing token during toggle', async () => {
     let resolveToken!: (value: Response) => void
     vi.mocked(fetch).mockImplementationOnce(
-      () => new Promise((resolve) => { resolveToken = resolve }),
+      () =>
+        new Promise((resolve) => {
+          resolveToken = resolve
+        }),
     )
     const wrapper = mount(BeefreeExample, {
       props: { builderType: 'emailBuilder', builderLanguage: 'en-US' },
@@ -498,7 +667,9 @@ describe('BeefreeExample', () => {
       props: { builderType: 'emailBuilder', builderLanguage: 'en-US' },
       global: { stubs: { Builder: true } },
     })
-    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), { timeout: 3000 })
+    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), {
+      timeout: 3000,
+    })
     const vm = wrapper.vm as unknown as { toggleCoEditing: () => Promise<void> }
     await vm.toggleCoEditing()
     await wrapper.vm.$nextTick()
@@ -508,7 +679,9 @@ describe('BeefreeExample', () => {
       json: () => Promise.resolve({ access_token: 'page-token', v2: true }),
     } as Response)
     await wrapper.setProps({ builderType: 'pageBuilder' })
-    await waitFor(() => expect((wrapper.vm as unknown as { isShared: boolean }).isShared).toBe(false))
+    await waitFor(() =>
+      expect((wrapper.vm as unknown as { isShared: boolean }).isShared).toBe(false),
+    )
   })
 
   it('watch builderLanguage calls coEditingBuilder.loadConfig when shared', async () => {
@@ -516,7 +689,9 @@ describe('BeefreeExample', () => {
       props: { builderType: 'emailBuilder', builderLanguage: 'en-US' },
       global: { stubs: { Builder: true } },
     })
-    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), { timeout: 3000 })
+    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), {
+      timeout: 3000,
+    })
     const vm = wrapper.vm as unknown as { toggleCoEditing: () => Promise<void> }
     await vm.toggleCoEditing()
     await wrapper.vm.$nextTick()
@@ -535,7 +710,9 @@ describe('BeefreeExample', () => {
       props: { builderType: 'emailBuilder', builderLanguage: 'en-US' },
       global: { stubs: { Builder: BuilderStub } },
     })
-    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), { timeout: 3000 })
+    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), {
+      timeout: 3000,
+    })
     await wrapper.find('.builder-stub').find('.emit-session-started').trigger('click')
     await wrapper.vm.$nextTick()
   })

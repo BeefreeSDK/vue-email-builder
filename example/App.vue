@@ -2,21 +2,24 @@
   <main class="main">
     <header>
       <div class="left-side">
-        <img src="/logo.svg" height="40" alt="Beefree SDK" />
+        <img src="/images/logo.svg" height="40" alt="Beefree SDK" />
       </div>
       <div class="right-side">
         <div class="header-controls">
           <div class="header-select-group">
-            <label for="headerBuilderType">Builder:</label>
+            <label for="headerBuilderType">{{ appStrings.builderLabel }}</label>
             <select id="headerBuilderType" v-model="selectedBuilderType">
-              <option value="emailBuilder">Email Builder</option>
-              <option value="pageBuilder">Page Builder</option>
-              <option value="popupBuilder">Popup Builder</option>
-              <option value="fileManager">File Manager</option>
+              <option
+                v-for="builder in builderTypeOptions"
+                :key="builder.value"
+                :value="builder.value"
+              >
+                {{ builder.label }}
+              </option>
             </select>
           </div>
           <div class="header-select-group">
-            <label for="headerLanguage">Language:</label>
+            <label for="headerLanguage">{{ appStrings.languageLabel }}</label>
             <select id="headerLanguage" v-model="selectedBuilderLanguage">
               <option v-for="lang in uiLanguages" :key="lang" :value="lang">
                 {{ lang }}
@@ -25,14 +28,18 @@
           </div>
           <button
             class="co-editing-btn"
-            :disabled="!beefreeRef?.builderReady || beefreeRef?.isExecuting || selectedBuilderType === 'fileManager'"
+            :disabled="
+              !beefreeRef?.builderReady ||
+              beefreeRef?.isExecuting ||
+              selectedBuilderType === 'fileManager'
+            "
             :class="{ active: beefreeRef?.isShared }"
             @click="beefreeRef?.toggleCoEditing()"
           >
-            Co-editing
+            {{ appStrings.coEditing }}
           </button>
         </div>
-        <img src="/vue-wordmark-white.svg" alt="Vue.js" />
+        <img src="/images/vue-wordmark-white.svg" alt="Vue.js" />
       </div>
     </header>
     <div class="content">
@@ -56,9 +63,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
 import BeefreeExample from './BeefreeExample.vue'
 import type { BuilderType } from './BeefreeExample.vue'
+import { messages, uiLanguages } from './i18n'
+import type { LocaleCode } from './i18n'
 
 interface Toast {
   message: string
@@ -68,20 +77,28 @@ interface Toast {
 
 const toast = ref<Toast | null>(null)
 const selectedBuilderType = ref<BuilderType>('emailBuilder')
-const selectedBuilderLanguage = ref('en-US')
+const selectedBuilderLanguage = ref<LocaleCode>('en-US')
 const beefreeRef = ref<InstanceType<typeof BeefreeExample> | null>(null)
 
 let showTimerId: ReturnType<typeof setTimeout> | undefined
 let hideTimerId: ReturnType<typeof setTimeout> | undefined
 
-const uiLanguages = [
-  'en-US', 'it-IT', 'es-ES', 'fr-FR', 'de-DE', 'pt-BR',
-  'id-ID', 'ja-JP', 'zh-CN', 'zh-HK', 'cs-CZ', 'nb-NO',
-  'da-DK', 'sv-SE', 'pl-PL', 'hu-HU', 'ru-RU', 'ko-KR',
-  'nl-NL', 'fi-FI', 'ro-RO', 'sl-SI',
-]
+const localeStrings = computed(() => messages[selectedBuilderLanguage.value] ?? messages['en-US'])
+const appStrings = computed(() => localeStrings.value.app)
 
-function handleNotify(message: string, type: 'success' | 'error' | 'info', title?: string, durationMs = 5000) {
+const builderTypeOptions = computed<{ value: BuilderType; label: string }[]>(() => [
+  { value: 'emailBuilder', label: appStrings.value.builderTypes.emailBuilder },
+  { value: 'pageBuilder', label: appStrings.value.builderTypes.pageBuilder },
+  { value: 'popupBuilder', label: appStrings.value.builderTypes.popupBuilder },
+  { value: 'fileManager', label: appStrings.value.builderTypes.fileManager },
+])
+
+function handleNotify(
+  message: string,
+  type: 'success' | 'error' | 'info',
+  title?: string,
+  durationMs = 5000,
+) {
   clearTimeout(showTimerId)
   clearTimeout(hideTimerId)
 
@@ -94,7 +111,7 @@ function handleNotify(message: string, type: 'success' | 'error' | 'info', title
 
 onMounted(() => {
   showTimerId = setTimeout(() => {
-    handleNotify('Your Vue.js Beefree SDK app is up and running.', 'success', 'Congratulations!')
+    handleNotify(appStrings.value.welcomeMessage, 'success', appStrings.value.welcomeTitle)
   }, 500)
 })
 
@@ -105,7 +122,8 @@ onUnmounted(() => {
 </script>
 
 <style>
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
 }
@@ -133,9 +151,18 @@ html, body {
     #7638ff 100%
   );
 
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
-    "Segoe UI Symbol";
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif,
+    'Apple Color Emoji',
+    'Segoe UI Emoji',
+    'Segoe UI Symbol';
   box-sizing: border-box;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -274,16 +301,24 @@ header,
   background: #fff;
   border-radius: 12px;
   padding: 20px 28px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.08);
   z-index: 1000;
   min-width: 280px;
   max-width: 420px;
   border-left: 4px solid;
 }
 
-.toast-success { border-left-color: #16a34a; }
-.toast-error { border-left-color: #dc2626; }
-.toast-info { border-left-color: #2563eb; }
+.toast-success {
+  border-left-color: #16a34a;
+}
+.toast-error {
+  border-left-color: #dc2626;
+}
+.toast-info {
+  border-left-color: #2563eb;
+}
 
 .toast h3 {
   margin: 0 0 4px;
@@ -305,8 +340,9 @@ header,
 
 .toast-enter-active,
 .toast-leave-active {
-  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
-              opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .toast-enter-from,

@@ -37,12 +37,10 @@ import type { SDKInstance, UseBuilder } from '../types'
 export const useBuilder = (initialConfig: IBeeConfig): UseBuilder => {
   const { registry, version } = useSDKInstanceRegistry()
   const getContainerKey = (container: IBeeConfig['container']) =>
-    (typeof container === 'string' ? container : '')
+    typeof container === 'string' ? container : ''
   const containerKey = getContainerKey(initialConfig.container)
   const configRef = ref<IBeeConfig>(initialConfig)
-  const instance = ref<SDKInstance | null>(
-    registry.get(containerKey) ?? null,
-  )
+  const instance = ref<SDKInstance | null>(registry.get(containerKey) ?? null)
 
   const configRegistry = getConfigRegistry()
   if (!configRegistry.has(containerKey)) {
@@ -67,7 +65,10 @@ export const useBuilder = (initialConfig: IBeeConfig): UseBuilder => {
         configRef.value.onWarning?.(err as never)
         return configRef.value
       } else {
-        configRef.value.onError?.({ code: 1000, message: `Error updating builder config: ${error}` })
+        configRef.value.onError?.({
+          code: 1000,
+          message: `Error updating builder config: ${error}`,
+        })
         throw error
       }
     }

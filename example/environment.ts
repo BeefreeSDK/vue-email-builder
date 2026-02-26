@@ -2,7 +2,8 @@ interface BuilderConfig {
   clientId: string
   clientSecret: string
   userId: string
-  templateUrl: string
+  sampleTemplateUrl: string
+  blankTemplateUrl: string
 }
 
 interface Environment {
@@ -22,25 +23,32 @@ export function createEnvironment(env: EnvLike = import.meta.env): Environment {
       clientId: env.VITE_EMAIL_BUILDER_CLIENT_ID ?? '',
       clientSecret: env.VITE_EMAIL_BUILDER_CLIENT_SECRET ?? '',
       userId: env.VITE_EMAIL_BUILDER_USER_ID ?? 'your-user-id',
-      templateUrl: 'https://rsrc.getbee.io/api/templates/m-bee',
+      sampleTemplateUrl:
+        env.VITE_EMAIL_TEMPLATE_URL ?? 'https://rsrc.getbee.io/api/templates/m-bee',
+      blankTemplateUrl: '/templates/blank-template.json',
     },
     pageBuilder: {
       clientId: env.VITE_PAGE_BUILDER_CLIENT_ID ?? '',
       clientSecret: env.VITE_PAGE_BUILDER_CLIENT_SECRET ?? '',
       userId: env.VITE_PAGE_BUILDER_USER_ID ?? 'your-user-id',
-      templateUrl: 'https://raw.githubusercontent.com/BeefreeSDK/beefree-sdk-assets-templates/main/v3/bee-templates/blank.json',
+      sampleTemplateUrl:
+        env.VITE_PAGE_TEMPLATE_URL ?? 'https://rsrc.getbee.io/api/templates/m-bee-page',
+      blankTemplateUrl: '/templates/blank-template.json',
     },
     popupBuilder: {
       clientId: env.VITE_POPUP_BUILDER_CLIENT_ID ?? '',
       clientSecret: env.VITE_POPUP_BUILDER_CLIENT_SECRET ?? '',
       userId: env.VITE_POPUP_BUILDER_USER_ID ?? 'your-user-id',
-      templateUrl: 'https://raw.githubusercontent.com/BeefreeSDK/beefree-sdk-assets-templates/main/v3/bee-templates/blank.json',
+      sampleTemplateUrl:
+        env.VITE_POPUP_TEMPLATE_URL ?? 'https://rsrc.getbee.io/api/templates/m-bee-popup',
+      blankTemplateUrl: '/templates/blank-template.json',
     },
     fileManager: {
       clientId: env.VITE_FILE_MANAGER_CLIENT_ID ?? '',
       clientSecret: env.VITE_FILE_MANAGER_CLIENT_SECRET ?? '',
       userId: env.VITE_FILE_MANAGER_USER_ID ?? 'your-user-id',
-      templateUrl: 'https://raw.githubusercontent.com/BeefreeSDK/beefree-sdk-assets-templates/main/v3/bee-templates/blank.json',
+      sampleTemplateUrl: '',
+      blankTemplateUrl: '/templates/blank-template.json',
     },
   }
 }

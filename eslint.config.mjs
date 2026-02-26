@@ -1,6 +1,6 @@
 import pluginVue from 'eslint-plugin-vue'
 import vueTsEslintConfig from '@vue/eslint-config-typescript'
-import stylistic from '@stylistic/eslint-plugin'
+import eslintConfigPrettier from 'eslint-config-prettier'
 
 export default [
   {
@@ -8,16 +8,9 @@ export default [
   },
   ...pluginVue.configs['flat/recommended'],
   ...vueTsEslintConfig(),
+  eslintConfigPrettier,
   {
-    plugins: {
-      '@stylistic': stylistic,
-    },
     rules: {
-      '@stylistic/indent': ['error', 2],
-      '@stylistic/quotes': ['error', 'single'],
-      '@stylistic/semi': ['error', 'never'],
-      '@stylistic/comma-dangle': ['error', 'always-multiline'],
-      '@stylistic/brace-style': ['error', '1tbs', { allowSingleLine: true }],
       'vue/multi-word-component-names': 'off',
     },
   },

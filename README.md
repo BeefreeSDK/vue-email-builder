@@ -5,7 +5,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)](https://www.typescriptlang.org/)
 [![Vue](https://img.shields.io/badge/Vue-3.5-42d392)](https://vuejs.org/)
 
-A Vue 3 wrapper for the [Beefree SDK](https://www.beefree.io/), providing components and composables to integrate the Beefree email, page, and popup builder into Vue.js applications.
+A Vue 3 wrapper for the [Beefree SDK](https://www.beefree.io/), providing the Builder component and composables to integrate the Beefree email, page, and popup builder into Vue.js applications.
 
 <p align="center">
   <img src="docs/vue-email-builder.png" alt="Beefree SDK Vue.js Email Builder with co-editing" width="800" />
@@ -25,19 +25,20 @@ A Vue 3 wrapper for the [Beefree SDK](https://www.beefree.io/), providing compon
 - [Examples](#examples)
 - [FAQ](#faq)
 - [Development](#development)
+- [Other Frameworks](#other-frameworks)
 - [License](#license)
 
 ## What is Beefree SDK?
 
 [Beefree SDK](https://www.beefree.io/) is a drag-and-drop visual content builder that lets your users design professional emails, landing pages, and popups — without writing code. It powers thousands of SaaS applications worldwide, offering a white-label, embeddable editing experience with real-time collaborative editing, responsive design output, and extensive customization options.
 
-This Vue package provides `Builder` components and a `useBuilder` composable that handle SDK initialization, lifecycle management, and configuration updates — giving you a Vue-friendly API to integrate the full Beefree editing experience into your application.
+This Vue package provides a `Builder` component and a `useBuilder` composable that handle SDK initialization, lifecycle management, and configuration updates — giving you a Vue-friendly API to integrate the full Beefree editing experience into your application.
 
 ## Overview
 
 ### Features
 
-- **Simple Vue Integration** - Drop-in components with minimal setup
+- **Simple Vue Integration** - Drop-in component with minimal setup
 - **Composition API** - `useBuilder` composable for programmatic control
 - **Dynamic Configuration** - Update builder configuration reactively
 - **Collaborative Editing** - Support for shared/collaborative sessions
@@ -46,11 +47,11 @@ This Vue package provides `Builder` components and a `useBuilder` composable tha
 
 ## Compatibility
 
-| Requirement | Version |
-|-------------|---------|
-| Vue         | >= 3.3 |
-| Node.js     | >= 18.0.0 |
-| TypeScript  | >= 4.7 (optional, but recommended) |
+| Requirement | Version                                           |
+| ----------- | ------------------------------------------------- |
+| Vue         | >= 3.3                                            |
+| Node.js     | >= 18.0.0                                         |
+| TypeScript  | >= 4.7 (optional, but recommended)                |
 | Browsers    | Chrome, Firefox, Safari, Edge (latest 2 versions) |
 
 ## Installation
@@ -104,13 +105,7 @@ app.post('/api/beefree/token', async (req, res) => {
       <button @click="preview()">Preview</button>
       <button @click="save()">Save</button>
     </div>
-    <Builder
-      v-if="token"
-      :token="token"
-      :config="config"
-      @bb-save="onSave"
-      @bb-error="onError"
-    />
+    <Builder v-if="token" :token="token" :config="config" @bb-save="onSave" @bb-error="onError" />
     <div v-else>Loading builder...</div>
   </div>
 </template>
@@ -154,45 +149,45 @@ The component that wraps the Beefree SDK. Use it for email, page, popup, or file
 
 #### Props
 
-| Prop        | Type                 | Default                               | Description                                |
-|-------------|----------------------|---------------------------------------|--------------------------------------------|
-| `token`     | `IToken`             | **required**                          | Authentication token from Beefree API      |
-| `template`  | `IEntityContentJson` | `null`                                | Template JSON to load                      |
-| `config`    | `IBeeConfig`         | `{ container: 'beefree-sdk-container' }` | SDK configuration                       |
-| `width`     | `string`             | `'100%'`                              | Container width                            |
-| `height`    | `string`             | `'100%'`                              | Container height                           |
-| `shared`    | `boolean`            | `false`                               | Enable collaborative editing session       |
-| `sessionId` | `string`             | `null`                                | Session ID to join (for collaborative editing) |
-| `loaderUrl` | `string`             | `null`                                | Custom SDK loader URL                      |
-| `bucketDir` | `string`             | `undefined`                           | Custom bucket directory                    |
+| Prop        | Type                 | Default                                  | Description                                    |
+| ----------- | -------------------- | ---------------------------------------- | ---------------------------------------------- |
+| `token`     | `IToken`             | **required**                             | Authentication token from Beefree API          |
+| `template`  | `IEntityContentJson` | `null`                                   | Template JSON to load                          |
+| `config`    | `IBeeConfig`         | `{ container: 'beefree-sdk-container' }` | SDK configuration                              |
+| `width`     | `string`             | `'100%'`                                 | Container width                                |
+| `height`    | `string`             | `'100%'`                                 | Container height                               |
+| `shared`    | `boolean`            | `false`                                  | Enable collaborative editing session           |
+| `sessionId` | `string`             | `null`                                   | Session ID to join (for collaborative editing) |
+| `loaderUrl` | `string`             | `null`                                   | Custom SDK loader URL                          |
+| `bucketDir` | `string`             | `undefined`                              | Custom bucket directory                        |
 
 #### Events
 
 All events are prefixed with `bb-` (Beefree Builder) to avoid collisions with native DOM events:
 
-| Event                          | SDK Callback                  | Payload                                                    |
-|--------------------------------|-------------------------------|------------------------------------------------------------|
-| `bb-save`                      | `onSave`                      | `[pageJson, pageHtml, ampHtml, templateVersion, language]` |
-| `bb-save-as-template`          | `onSaveAsTemplate`            | `[pageJson, templateVersion]`                              |
-| `bb-send`                      | `onSend`                      | `htmlFile`                                                 |
-| `bb-error`                     | `onError`                     | `error`                                                    |
-| `bb-warning`                   | `onWarning`                   | `warning`                                                  |
-| `bb-load`                      | `onLoad`                      | `value`                                                    |
-| `bb-change`                    | `onChange`                     | `[json, detail, version]`                                  |
-| `bb-auto-save`                 | `onAutoSave`                  | `json`                                                     |
-| `bb-start`                     | `onStart`                     | —                                                          |
-| `bb-comment`                   | `onComment`                   | `[comment, action]`                                        |
-| `bb-info`                      | `onInfo`                      | `info`                                                     |
-| `bb-preview`                   | `onPreview`                   | `isOpen`                                                   |
-| `bb-toggle-preview`            | `onTogglePreview`             | `isOpen`                                                   |
-| `bb-preview-change`            | `onPreviewChange`             | `value`                                                    |
-| `bb-save-row`                  | `onSaveRow`                   | `[rowJson, rowHtml, rowMeta]`                              |
-| `bb-remote-change`             | `onRemoteChange`              | `[json, detail, version]`                                  |
-| `bb-session-change`            | `onSessionChange`             | `value`                                                    |
-| `bb-session-started`           | `onSessionStarted`            | `value`                                                    |
-| `bb-template-language-change`  | `onTemplateLanguageChange`    | `{ label, value, isMain }`                                 |
-| `bb-view-change`               | `onViewChange`                | `value`                                                    |
-| `bb-load-workspace`            | `onLoadWorkspace`             | `value`                                                    |
+| Event                         | SDK Callback               | Payload                                                    |
+| ----------------------------- | -------------------------- | ---------------------------------------------------------- |
+| `bb-save`                     | `onSave`                   | `[pageJson, pageHtml, ampHtml, templateVersion, language]` |
+| `bb-save-as-template`         | `onSaveAsTemplate`         | `[pageJson, templateVersion]`                              |
+| `bb-send`                     | `onSend`                   | `htmlFile`                                                 |
+| `bb-error`                    | `onError`                  | `error`                                                    |
+| `bb-warning`                  | `onWarning`                | `warning`                                                  |
+| `bb-load`                     | `onLoad`                   | `value`                                                    |
+| `bb-change`                   | `onChange`                 | `[json, detail, version]`                                  |
+| `bb-auto-save`                | `onAutoSave`               | `json`                                                     |
+| `bb-start`                    | `onStart`                  | —                                                          |
+| `bb-comment`                  | `onComment`                | `[comment, action]`                                        |
+| `bb-info`                     | `onInfo`                   | `info`                                                     |
+| `bb-preview`                  | `onPreview`                | `isOpen`                                                   |
+| `bb-toggle-preview`           | `onTogglePreview`          | `isOpen`                                                   |
+| `bb-preview-change`           | `onPreviewChange`          | `value`                                                    |
+| `bb-save-row`                 | `onSaveRow`                | `[rowJson, rowHtml, rowMeta]`                              |
+| `bb-remote-change`            | `onRemoteChange`           | `[json, detail, version]`                                  |
+| `bb-session-change`           | `onSessionChange`          | `value`                                                    |
+| `bb-session-started`          | `onSessionStarted`         | `value`                                                    |
+| `bb-template-language-change` | `onTemplateLanguageChange` | `{ label, value, isMain }`                                 |
+| `bb-view-change`              | `onViewChange`             | `value`                                                    |
+| `bb-load-workspace`           | `onLoadWorkspace`          | `value`                                                    |
 
 ### Handling Builder Events
 
@@ -264,33 +259,33 @@ The composable connects to the builder instance through the `container` ID:
 
 ### Available Methods
 
-| Method                            | Description                              |
-|-----------------------------------|------------------------------------------|
-| `updateConfig(partial)`           | Updates builder configuration dynamically |
-| `save(options?)`                  | Triggers save action                     |
-| `saveAsTemplate()`                | Saves as template                        |
-| `send(args?)`                     | Sends the email                          |
-| `load(template)`                  | Loads a template JSON                    |
-| `reload(template, options?)`      | Reloads without loading dialog           |
-| `preview()`                       | Opens preview                            |
-| `togglePreview()`                 | Toggles preview                          |
-| `switchPreview(args?)`            | Switches preview language                |
-| `toggleComments()`                | Toggles comments panel                   |
-| `toggleStructure()`               | Toggles structure outlines               |
-| `toggleMergeTagsPreview()`        | Toggles merge tag preview                |
-| `switchTemplateLanguage(args)`    | Switches content language                |
-| `getTemplateJson()`               | Returns template JSON                    |
-| `getConfig()`                     | Returns current config                   |
-| `loadConfig(args, options?)`      | Loads new config                         |
-| `loadStageMode(args)`             | Loads stage mode                         |
-| `loadWorkspace(type)`             | Loads workspace                          |
-| `loadRows()`                      | Loads rows                               |
-| `showComment(comment)`            | Shows a comment                          |
-| `updateToken(token)`              | Updates auth token                       |
-| `execCommand(command, options?)`  | Executes editor command                  |
-| `startFileManager(config, ...)`   | Starts file manager                      |
-| `join(config, sessionId, ...)`    | Joins shared session                     |
-| `start(config, template, ...)`    | Starts builder                           |
+| Method                           | Description                               |
+| -------------------------------- | ----------------------------------------- |
+| `updateConfig(partial)`          | Updates builder configuration dynamically |
+| `save(options?)`                 | Triggers save action                      |
+| `saveAsTemplate()`               | Saves as template                         |
+| `send(args?)`                    | Sends the email                           |
+| `load(template)`                 | Loads a template JSON                     |
+| `reload(template, options?)`     | Reloads without loading dialog            |
+| `preview()`                      | Opens preview                             |
+| `togglePreview()`                | Toggles preview                           |
+| `switchPreview(args?)`           | Switches preview language                 |
+| `toggleComments()`               | Toggles comments panel                    |
+| `toggleStructure()`              | Toggles structure outlines                |
+| `toggleMergeTagsPreview()`       | Toggles merge tag preview                 |
+| `switchTemplateLanguage(args)`   | Switches content language                 |
+| `getTemplateJson()`              | Returns template JSON                     |
+| `getConfig()`                    | Returns current config                    |
+| `loadConfig(args, options?)`     | Loads new config                          |
+| `loadStageMode(args)`            | Loads stage mode                          |
+| `loadWorkspace(type)`            | Loads workspace                           |
+| `loadRows()`                     | Loads rows                                |
+| `showComment(comment)`           | Shows a comment                           |
+| `updateToken(token)`             | Updates auth token                        |
+| `execCommand(command, options?)` | Executes editor command                   |
+| `startFileManager(config, ...)`  | Starts file manager                       |
+| `join(config, sessionId, ...)`   | Joins shared session                      |
+| `start(config, template, ...)`   | Starts builder                            |
 
 ## Best Practices
 
@@ -305,9 +300,9 @@ The composable connects to the builder instance through the `container` ID:
 const token = await fetch('https://auth.getbee.io/loginV2', {
   method: 'POST',
   body: JSON.stringify({
-    client_id: 'your-client-id',      // ❌ Exposed!
-    client_secret: 'your-secret',      // ❌ Exposed!
-  })
+    client_id: 'your-client-id', // ❌ Exposed!
+    client_secret: 'your-secret', // ❌ Exposed!
+  }),
 })
 ```
 
@@ -324,8 +319,8 @@ app.post('/api/beefree/token', async (req, res) => {
     body: JSON.stringify({
       client_id: process.env.BEEFREE_CLIENT_ID,
       client_secret: process.env.BEEFREE_CLIENT_SECRET,
-      uid: req.user.id
-    })
+      uid: req.user.id,
+    }),
   })
 
   const token = await response.json()
@@ -435,15 +430,15 @@ const config = {
       handler: async (resolve) => {
         const rowName = await showCustomDialog()
         resolve({ name: rowName })
-      }
+      },
     },
     addOn: {
       handler: async (resolve) => {
         const content = await fetchCustomContent()
         resolve(content)
-      }
-    }
-  }
+      },
+    },
+  },
 }
 ```
 
@@ -456,9 +451,9 @@ const config = {
       {
         name: 'My Saved Rows',
         handle: 'saved-rows',
-        isLocal: true
-      }
-    ]
+        isLocal: true,
+      },
+    ],
   },
   hooks: {
     getRows: {
@@ -469,9 +464,9 @@ const config = {
         } else {
           reject('Handle not found')
         }
-      }
-    }
-  }
+      },
+    },
+  },
 }
 ```
 
@@ -484,12 +479,12 @@ const config = {
       handler: async (resolve) => {
         const mentions = [
           { username: 'FirstName', value: '{{firstName}}', uid: 'fn' },
-          { username: 'LastName', value: '{{lastName}}', uid: 'ln' }
+          { username: 'LastName', value: '{{lastName}}', uid: 'ln' },
         ]
         resolve(mentions)
-      }
-    }
-  }
+      },
+    },
+  },
 }
 ```
 
@@ -499,8 +494,9 @@ The [`/example`](example/) directory contains a fully working application that d
 
 - Token authentication flow
 - Collaborative editing with template preservation
-- Save, preview, and export functionality
-- Multi-language UI switching
+- Save/preview actions and downloads from builder callbacks (`Save` -> `.html`, `Save as Template` -> `.json`)
+- Multi-language UI switching (header + example control labels outside the builder)
+- Sample/blank template toggle with local blank template fallback
 - Different builder modes (email, page, popup, file manager) via config
 - Per-instance control bars in co-editing mode
 - Keyboard-accessible split divider with ARIA attributes
@@ -544,7 +540,7 @@ Pass your template JSON to the `:template` prop of the `Builder` component. You 
 
 ### Can I use the Options API instead of `<script setup>`?
 
-The `useBuilder` composable must be called within a Vue setup context (either `<script setup>` or inside the `setup()` function). The components themselves work with both the Options API and the Composition API.
+The `useBuilder` composable must be called within a Vue setup context (either `<script setup>` or inside the `setup()` function). The Builder component works with both the Options API and the Composition API.
 
 ## Development
 
@@ -584,6 +580,7 @@ yarn build
 The library build uses **Vite library mode** (`vite.lib.config.ts`) and generates ESM, CJS, and DTS outputs.
 
 Outputs:
+
 - `dist/index.js` - CommonJS bundle
 - `dist/index.es.js` - ES module bundle
 - `dist/index.d.ts` - TypeScript definitions
@@ -592,7 +589,7 @@ Outputs:
 
 ```
 src/                      # Library source
-  components/             # Vue components (Builder + convenience aliases)
+  components/             # Vue component (Builder)
   composables/            # Vue composables (useBuilder, useRegistry)
   types.ts                # TypeScript types
   constants.ts            # Constants
@@ -614,6 +611,24 @@ Copy `example/.env.sample` to `example/.env` and fill in your Beefree SDK creden
 ```
 VITE_EMAIL_BUILDER_CLIENT_ID=your-client-id
 VITE_EMAIL_BUILDER_CLIENT_SECRET=your-client-secret
+VITE_EMAIL_BUILDER_USER_ID=your-user-id
+
+VITE_PAGE_BUILDER_CLIENT_ID=your-client-id
+VITE_PAGE_BUILDER_CLIENT_SECRET=your-client-secret
+VITE_PAGE_BUILDER_USER_ID=your-user-id
+
+VITE_POPUP_BUILDER_CLIENT_ID=your-client-id
+VITE_POPUP_BUILDER_CLIENT_SECRET=your-client-secret
+VITE_POPUP_BUILDER_USER_ID=your-user-id
+
+VITE_FILE_MANAGER_CLIENT_ID=your-client-id
+VITE_FILE_MANAGER_CLIENT_SECRET=your-client-secret
+VITE_FILE_MANAGER_USER_ID=your-user-id
+
+# Optional: override sample template URLs used by the example UI
+VITE_EMAIL_TEMPLATE_URL=https://rsrc.getbee.io/api/templates/m-bee
+VITE_PAGE_TEMPLATE_URL=https://rsrc.getbee.io/api/templates/m-bee-page
+VITE_POPUP_TEMPLATE_URL=https://rsrc.getbee.io/api/templates/m-bee-popup
 ```
 
 ## Troubleshooting
@@ -629,6 +644,15 @@ VITE_EMAIL_BUILDER_CLIENT_SECRET=your-client-secret
 
 The `container` ID in your `useBuilder` config must match the `container` in the `Builder` component's config. The composable binds to the SDK instance by container ID.
 
+## Other Frameworks
+
+Beefree SDK wrappers are available for the following frameworks:
+
+| Framework | Package                             | Repository                                                                              |
+| --------- | ----------------------------------- | --------------------------------------------------------------------------------------- |
+| React     | `@beefree.io/react-email-builder`   | [BeefreeSDK/react-email-builder](https://github.com/BeefreeSDK/react-email-builder)     |
+| Angular   | `@beefree.io/angular-email-builder` | [BeefreeSDK/angular-email-builder](https://github.com/BeefreeSDK/angular-email-builder) |
+
 ## License
 
 [Apache License 2.0](LICENSE)
@@ -636,6 +660,7 @@ The `container` ID in your `useBuilder` config must match the `container` in the
 ## Support
 
 For issues related to:
+
 - **This Vue wrapper**: Open an issue on [this repository](https://github.com/BeefreeSDK/vue-email-builder/issues)
 - **Beefree SDK**: Visit [Beefree Developer Documentation](https://docs.beefree.io/)
 - **Account/billing**: Contact [Beefree Support](https://www.beefree.io/support/)

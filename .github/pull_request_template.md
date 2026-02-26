@@ -30,6 +30,7 @@ Fixes #
 - [ ] Manual testing
 
 **Test Configuration**:
+
 - Node version:
 - Vue version:
 - Browser (if applicable):

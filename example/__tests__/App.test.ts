@@ -82,6 +82,14 @@ describe('App', () => {
     expect(beefree.props('builderLanguage')).toBe('it-IT')
   })
 
+  it('falls back to en-US labels when language value is unsupported', async () => {
+    const wrapper = mount(App)
+    ;(wrapper.vm as unknown as { selectedBuilderLanguage: string }).selectedBuilderLanguage =
+      'xx-YY'
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('label[for="headerBuilderType"]').text()).toBe('Builder:')
+  })
+
   it('does not apply error-title class when toast type is not error', async () => {
     const wrapper = mount(App)
     const beefree = wrapper.findComponent({ name: 'BeefreeExample' })
@@ -102,7 +110,9 @@ describe('App', () => {
 
   it('co-editing button gets active class when toggleCoEditing is on', async () => {
     const wrapper = mount(App)
-    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), { timeout: 3000 })
+    await waitFor(() => expect(wrapper.find('.builders-area').exists()).toBe(true), {
+      timeout: 3000,
+    })
     const btn = wrapper.find('.co-editing-btn')
     await btn.trigger('click')
     await wrapper.vm.$nextTick()

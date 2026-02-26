@@ -1,8 +1,5 @@
 <template>
-  <div
-    :id="container"
-    :style="{ width: props.width, height: props.height }"
-  />
+  <div :id="container" :style="{ width: props.width, height: props.height }" />
 </template>
 
 <script setup lang="ts">
@@ -163,12 +160,12 @@ function initializeBeefree(): void {
   }
 
   if (!props.token) {
-    emit('bb-error', { message: 'Can\'t start the builder without a token' })
+    emit('bb-error', { message: "Can't start the builder without a token" })
     return
   }
 
   if (!props.config.uid) {
-    emit('bb-error', { message: 'Can\'t start the builder without a uid in config' })
+    emit('bb-error', { message: "Can't start the builder without a uid in config" })
     return
   }
 

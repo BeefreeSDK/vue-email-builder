@@ -26,7 +26,7 @@ describe('Builder Component', () => {
         content: {
           style: {
             'font-family': '',
-            'color': '',
+            color: '',
           },
           computedStyle: {
             align: '',
@@ -103,12 +103,7 @@ describe('Builder Component', () => {
       },
     })
 
-    expect(mockStart).toHaveBeenCalledWith(
-      expect.anything(),
-      {},
-      undefined,
-      expect.anything(),
-    )
+    expect(mockStart).toHaveBeenCalledWith(expect.anything(), {}, undefined, expect.anything())
   })
 
   it('renders container div with custom height and width', () => {
@@ -128,8 +123,8 @@ describe('Builder Component', () => {
   })
 
   it('calls start when no sessionId', () => {
-    const mockStart = vi.fn().mockResolvedValue(undefined);
-    (BeefreeSDK as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => ({
+    const mockStart = vi.fn().mockResolvedValue(undefined)
+    ;(BeefreeSDK as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => ({
       start: mockStart,
       join: vi.fn(),
       loadConfig: vi.fn(),
@@ -147,8 +142,8 @@ describe('Builder Component', () => {
   })
 
   it('calls join when shared and sessionId provided', () => {
-    const mockJoin = vi.fn().mockResolvedValue(undefined);
-    (BeefreeSDK as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => ({
+    const mockJoin = vi.fn().mockResolvedValue(undefined)
+    ;(BeefreeSDK as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => ({
       start: vi.fn(),
       join: mockJoin,
       loadConfig: vi.fn(),
@@ -379,8 +374,8 @@ describe('Builder Component', () => {
   })
 
   it('calls onError when SDK start fails', async () => {
-    const mockStart = vi.fn().mockRejectedValue(new Error('SDK initialization failed'));
-    (BeefreeSDK as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => ({
+    const mockStart = vi.fn().mockRejectedValue(new Error('SDK initialization failed'))
+    ;(BeefreeSDK as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => ({
       start: mockStart,
       join: vi.fn(),
     }))
@@ -398,8 +393,8 @@ describe('Builder Component', () => {
   })
 
   it('calls onError when SDK join fails', async () => {
-    const mockJoin = vi.fn().mockRejectedValue(new Error('Join session failed'));
-    (BeefreeSDK as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => ({
+    const mockJoin = vi.fn().mockRejectedValue(new Error('Join session failed'))
+    ;(BeefreeSDK as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => ({
       start: vi.fn(),
       join: mockJoin,
     }))
@@ -419,8 +414,8 @@ describe('Builder Component', () => {
   })
 
   it('clears container content on unmount', async () => {
-    const mockStart = vi.fn().mockResolvedValue(undefined);
-    (BeefreeSDK as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => ({
+    const mockStart = vi.fn().mockResolvedValue(undefined)
+    ;(BeefreeSDK as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => ({
       start: mockStart,
       join: vi.fn(),
     }))

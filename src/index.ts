@@ -3,17 +3,8 @@ import Builder from './components/Builder.vue'
 import { useBuilder } from './composables/useBuilder'
 
 export type * from '@beefree.io/sdk/dist/types/bee'
-export {
-  Builder,
-  useBuilder,
-  BeeTypesInstance,
-}
-export type {
-  BuilderCallbacks,
-  BuilderProps,
-  BuilderPropsWithCallbacks,
-  UseBuilder,
-} from './types'
+export { Builder, useBuilder, BeeTypesInstance }
+export type { BuilderCallbacks, BuilderProps, BuilderPropsWithCallbacks, UseBuilder } from './types'
 
 export { DEFAULT_CONTAINER, SDK_LOADER_URL } from './constants'
 

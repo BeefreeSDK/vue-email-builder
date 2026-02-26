@@ -1,0 +1,25 @@
+{
+    "extends": "../tsconfig.json",
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "@beefree.io/vue-email-builder": [
+                "../src/index.ts"
+            ]
+        },
+        "types": [
+            "vite/client"
+        ]
+    },
+    "include": [
+        "./**/*.ts",
+        "./**/*.vue",
+        "./**/*.json",
+        "../src/**/*.ts",
+        "../src/**/*.vue"
+    ],
+    "exclude": [
+        "./coverage",
+        "./node_modules"
+    ]
+}

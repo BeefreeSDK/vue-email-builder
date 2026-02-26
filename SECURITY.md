@@ -41,9 +41,9 @@ When using `@beefree.io/vue-email-builder`:
 // ❌ DANGEROUS - DO NOT DO THIS
 const token = await fetch('https://auth.beefree.io/token', {
   body: JSON.stringify({
-    client_id: 'your-id',      // Exposed!
-    client_secret: 'your-secret' // Exposed!
-  })
+    client_id: 'your-id', // Exposed!
+    client_secret: 'your-secret', // Exposed!
+  }),
 })
 ```
 
@@ -52,7 +52,7 @@ const token = await fetch('https://auth.beefree.io/token', {
 ```javascript
 // ✅ SECURE - Backend handles credentials
 const token = await fetch('/api/beefree/token', {
-  credentials: 'include'
+  credentials: 'include',
 })
 ```
 

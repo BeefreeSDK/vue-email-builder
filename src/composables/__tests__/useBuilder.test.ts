@@ -32,9 +32,7 @@ describe('useBuilder', () => {
       label: 'English (US)',
       value: 'en-US',
     },
-    templateLanguages: [
-      { value: 'it-IT', label: 'Italiano' },
-    ],
+    templateLanguages: [{ value: 'it-IT', label: 'Italiano' }],
   }
 
   it('stores config in registry on mount', () => {

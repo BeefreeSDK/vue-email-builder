@@ -1,6 +1,6 @@
 {
   "name": "@beefree.io/vue-email-builder",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Vue.js wrapper for the Beefree SDK – A framework-specific package that provides the Builder component and composables to integrate the Beefree SDK (Email Builder, Page Builder, File Manager, Popup Builder) into Vue.js applications",
   "repository": {
     "type": "git",

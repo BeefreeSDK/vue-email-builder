@@ -8,7 +8,7 @@
 A Vue 3 wrapper for the [Beefree SDK](https://www.beefree.io/), providing the Builder component and composables to integrate the Beefree email, page, and popup builder into Vue.js applications.
 
 <p align="center">
-  <img src="docs/vue-email-builder.png" alt="Beefree SDK Vue.js Email Builder with co-editing" width="800" />
+  <img src="https://raw.githubusercontent.com/BeefreeSDK/vue-email-builder/main/docs/vue-email-builder.png" alt="Beefree SDK Vue.js Email Builder with co-editing" width="800" />
 </p>
 
 ## Table of Contents

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.2-beta.0](https://github.com/BeefreeSDK/vue-email-builder/compare/v1.1.1...v1.1.2-beta.0) (2026-11-27)
+
+
+### Security
+
+* **BEE-12978:** harden npm package publishing: releases are now published from GitHub Actions via npm trusted publishing (OIDC) with signed provenance attestations, replacing the long-lived npm token ([a12e696](https://github.com/BeefreeSDK/vue-email-builder/commit/a12e696e6ad2bccd3ca681baebfcdd31e80549df))
+
 ### [1.1.1](https://github.com/BeefreeSDK/vue-email-builder/compare/v1.1.0...v1.1.1) (2026-03-16)
 
 ## 1.1.0 (2026-03-16)
